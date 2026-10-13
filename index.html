@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101b31">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Penales de Rafa">
+  <link rel="manifest" href="manifest.webmanifest">
+  <title>Penales de otro universo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E⚽%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="rules.js"></script>
+  <script defer src="game.js"></script>
+</head>
+<body>
+  <main id="app">
+    <button id="fullscreen" class="icon-button fullscreen-button" aria-label="Pantalla completa" aria-pressed="false" title="Pantalla completa">⛶</button>
+    <p id="display-status" class="display-status" role="status" aria-live="polite" hidden></p>
+    <section id="selection" class="selection" aria-labelledby="title">
+      <header class="intro">
+        <span class="eyebrow"><span class="live-dot"></span> EL ESTADIO DE RAFA</span>
+        <h1 id="title">PENALES DE<br><span>OTRO UNIVERSO</span><i>⚡</i></h1>
+        <p>Siete héroes. Un arco. Tu momento.</p>
+      </header>
+      <div class="choose-heading"><h2>01 <span>ELEGÍ TU HÉROE</span></h2><span>UN PODER EN CADA TIRO</span></div>
+      <div class="characters" role="group" aria-label="Elegí un personaje">
+        <button class="hero-card selected" data-hero="goku" aria-pressed="true">
+          <span class="card-number">01 / SAIYAJIN</span><canvas class="portrait" width="420" height="350" data-portrait="goku" aria-hidden="true"></canvas>
+          <span class="hero-copy"><strong>GOKÚ</strong><span>KAMEHAMEHA</span><small>Un cañón de energía. Reflejos al límite.</small></span><span class="check" aria-hidden="true">✓</span>
+        </button>
+        <button class="hero-card" data-hero="naruto" aria-pressed="false">
+          <span class="card-number">02 / NINJA</span><canvas class="portrait" width="420" height="350" data-portrait="naruto" aria-hidden="true"></canvas>
+          <span class="hero-copy"><strong>NARUTO</strong><span>CLONES DE SOMBRA</span><small>Tres pelotas. Solo una es real.</small></span><span class="check" aria-hidden="true">✓</span>
+        </button>
+        <button class="hero-card" data-hero="subzero" aria-pressed="false">
+          <span class="card-number">03 / GUERRERO DE HIELO</span><canvas class="portrait" width="420" height="350" data-portrait="subzero" aria-hidden="true"></canvas>
+          <span class="hero-copy"><strong>SUB-ZERO</strong><span>TIEMPO CONGELADO</span><small>Congelá. Soltá. ¡Nuevo destino sorpresa!</small></span><span class="check" aria-hidden="true">✓</span>
+        </button>
+        <button class="hero-card" data-hero="pikachu" aria-pressed="false"><span class="card-number">04 / PODER ELÉCTRICO</span><canvas class="portrait" width="420" height="350" data-portrait="pikachu" aria-hidden="true"></canvas><span class="hero-copy"><strong>PIKACHU</strong><span>RAYO ELÉCTRICO</span><small>Un rayo en zigzag directo al arco.</small></span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="hero-card" data-hero="peppa" aria-pressed="false"><span class="card-number">05 / CHARCOS Y TRAVESURAS</span><canvas class="portrait" width="420" height="350" data-portrait="peppa" aria-hidden="true"></canvas><span class="hero-copy"><strong>PEPPA PIG</strong><span>LLUVIA DE BARRO</span><small>El arquero pierde de vista la pelota.</small></span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="hero-card" data-hero="ghost" aria-pressed="false"><span class="card-number">06 / CLASH ROYALE</span><canvas class="portrait" width="420" height="350" data-portrait="ghost" aria-hidden="true"></canvas><span class="hero-copy"><strong>FANTASMA REAL</strong><span>TIRO INVISIBLE</span><small>Desaparece y vuelve con otro destino.</small></span><span class="check" aria-hidden="true">✓</span></button>
+        <button class="hero-card" data-hero="spiderman" aria-pressed="false"><span class="card-number">07 / HÉROE ARÁCNIDO</span><canvas class="portrait" width="420" height="350" data-portrait="spiderman" aria-hidden="true"></canvas><span class="hero-copy"><strong>SPIDER-MAN</strong><span>TELARAÑA TRAMPA</span><small>Ata al arquero. ¡Se libera justo a tiempo!</small></span><span class="check" aria-hidden="true">✓</span></button>
+      </div>
+      <div class="setup-bottom">
+        <fieldset class="difficulty"><legend>02 ELEGÍ EL DESAFÍO</legend><div><button data-level="easy" class="active" aria-pressed="true">Fácil</button><button data-level="medium" aria-pressed="false">Medio</button><button data-level="hard" aria-pressed="false">Difícil</button></div></fieldset>
+        <button id="start" class="primary">¡A LA CANCHA! <span>↗</span></button>
+      </div>
+      <footer class="setup-note"><span>↔ Jugá con el celular acostado</span><span>5 tiros cada uno · Rival al azar · Sin cuentas</span></footer>
+    </section>
+
+    <section id="match" class="match" hidden aria-label="Partido de penales">
+      <header class="match-header">
+        <button id="leave" class="icon-button" aria-label="Pausar y salir">←</button>
+        <div class="team team-you"><span class="team-label">VOS · <b id="your-name"></b></span><div id="your-dots" class="shots" aria-label="Tus tiros"></div></div>
+        <div class="score"><span id="your-score">0</span><span class="score-dash">:</span><span id="rival-score">0</span><small id="round-label">RONDA 1 / 5</small></div>
+        <div class="team team-rival"><span class="team-label"><b id="rival-name"></b> · RIVAL</span><div id="rival-dots" class="shots" aria-label="Tiros del rival"></div></div>
+        <button id="sound" class="icon-button" aria-label="Silenciar sonidos" aria-pressed="false">♪</button>
+      </header>
+      <div class="arena" id="arena">
+        <canvas id="pitch" width="1100" height="620" aria-label="Cancha: deslizá para patear o mover al arquero" tabindex="0"></canvas>
+        <div class="turn-badge" id="turn-badge">TU TURNO DE PATEAR</div>
+        <div class="power-tag" id="power-tag"></div>
+        <div class="instruction" id="instruction"></div>
+        <button id="ice" class="ice-button" hidden>❄ CONGELAR</button>
+        <div id="announcement" class="announcement" hidden aria-live="polite"><strong id="result-title"></strong><span id="result-detail"></span><button id="next" class="primary">SIGUIENTE TURNO →</button></div>
+      </div>
+      <footer class="match-footer"><span id="match-level"></span><span id="status" role="status" aria-live="polite"></span><button id="help" class="text-button">Cómo jugar</button></footer>
+    </section>
+
+    <section id="finish" class="finish" hidden aria-labelledby="finish-title">
+      <canvas id="celebration" width="600" height="380" aria-hidden="true"></canvas>
+      <span class="eyebrow">PENALES DE OTRO UNIVERSO</span><h1 id="finish-title"></h1><p id="finish-detail"></p><div class="final-score" id="final-score"></div><button id="replay" class="primary">VOLVER A JUGAR ↗</button><button id="change" class="text-button">Elegir otro héroe</button>
+    </section>
+
+    <dialog id="help-dialog"><button class="dialog-close" data-close="help-dialog" aria-label="Cerrar ayuda">×</button><h2>TU PRIMER PARTIDO</h2><p><strong>Para patear:</strong> deslizá desde la pelota hacia un lugar del arco. Si apuntás afuera, el tiro sale.</p><p><strong>Para atajar:</strong> deslizá hacia donde va la pelota. Podés corregir. El contacto con manos, cabeza o cuerpo cuenta cuando llega al arco. También podés usar las flechas del teclado.</p><p><strong>Gokú:</strong> Kamehameha a máxima potencia. <strong>Naruto:</strong> dos clones desaparecen cerca del arco. <strong>Sub-Zero:</strong> tocá para congelar y soltar; cambia de dirección. Máximo 3 segundos, una vez por tiro; si apuntaste afuera, sigue afuera.</p><p><strong>Pikachu:</strong> tiro en zigzag eléctrico. <strong>Peppa:</strong> barro que tapa temporalmente la visión del arquero. <strong>Fantasma Real:</strong> la pelota se vuelve invisible y reaparece cambiando de dirección, con tiempo para atajar. <strong>Spider-Man:</strong> el arquero debe esperar a que se rompan las telarañas para moverse. Todos estos poderes afectan también al rival controlado por el juego.</p><p>Son 5 tiros cada uno. Si empatan, hay un tiro extra por jugador hasta desempatar.</p><button class="primary" data-close="help-dialog">¡ENTENDIDO!</button></dialog>
+    <dialog id="exit-dialog"><h2>¿VOLVEMOS AL INICIO?</h2><p>Se termina este partido. Podés empezar otro con cualquier héroe.</p><button class="primary" id="confirm-exit">SALIR DEL PARTIDO</button><button class="text-button" data-close="exit-dialog">Seguir jugando</button></dialog>
+    <dialog id="fullscreen-guide"><button class="dialog-close" data-close="fullscreen-guide" aria-label="Cerrar guía">×</button><h2>VISTA AMPLIADA ACTIVADA</h2><p>El juego aprovecha toda la zona disponible. Si tu navegador no permite ocultar sus barras, podés seguir jugando así.</p><p><strong>Para jugar sin las barras de Safari en iPhone:</strong></p><ol><li>Abrí este enlace en Safari y tocá <strong>Compartir</strong>.</li><li>Elegí <strong>Agregar a pantalla de inicio</strong>.</li><li>Si aparece, activá <strong>Abrir como app web</strong> y tocá <strong>Agregar</strong>.</li><li>Abrí el juego desde su nuevo icono y girá el celular.</li></ol><button class="primary" data-close="fullscreen-guide">JUGAR EN VISTA AMPLIADA</button></dialog>
+    <div id="rotate" class="rotate" aria-live="polite"><span>↻</span><strong>GIRÁ EL CELULAR</strong><p>El arco se ve mejor con la pantalla acostada.</p><button id="portrait-play" class="text-button">Jugar así por ahora</button></div>
+  </main>
+</body>
+</html>

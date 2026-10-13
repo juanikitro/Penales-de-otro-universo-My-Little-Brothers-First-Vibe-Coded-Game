@@ -1,0 +1,12 @@
+{
+  "id": "/",
+  "name": "Penales de otro universo",
+  "short_name": "Penales de Rafa",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#101b31",
+  "theme_color": "#101b31",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}
