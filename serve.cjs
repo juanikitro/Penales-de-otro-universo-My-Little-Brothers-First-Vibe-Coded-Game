@@ -13,4 +13,4 @@ http.createServer((request, response) => {
     response.writeHead(200, {'Content-Type':types[path.extname(name)], 'Cache-Control':'no-store'});
     response.end(content);
   });
-}).listen(4173, '127.0.0.1', () => console.log('Penales de otro universo: http://localhost:4173'));
+}).listen(Number(process.env.PORT || 4173), process.env.HOST || '127.0.0.1', () => console.log('Penales HTTP server ready'));
