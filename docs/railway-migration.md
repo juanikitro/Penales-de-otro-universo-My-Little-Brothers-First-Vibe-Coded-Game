@@ -1,9 +1,9 @@
 # Railway migration
 
-Public URL: https://penales.juanikitro.com
+Production files recovered byte-for-byte from Vercel deployment dpl_13wL7upLrBh6PfC84gjrxJjyzpN7 on 2026-11-12. Main previously contained an older game. Source hashes were checked before importing all 21 public files.
 
-Build the Dockerfile from migration/railway. It copies only the six public game files and the HTTP server; no npm install or external runtime dependency. PORT is supplied by Railway; HOST=0.0.0.0 in the container. Local serve.cjs keeps its localhost default.
+Dockerfile serves only an explicit whitelist with Node, as non-root. PORT defaults to 8080 in Docker and HOST to 0.0.0.0. Configure Railway Dockerfile path Dockerfile, healthcheck /, timeout 60 seconds, ON_FAILURE retry 3. Config applied directly to Railway; legacy railway.json is not used.
 
-Acceptance: 25 rule tests, JavaScript syntax, HTTP assets and 404 behavior, desktop/mobile game, sound, powers and fullscreen. User acceptance is required before removing Vercel; no fixed observation period. Vercel remains available until then.
+Deploy migration/railway and verify the effective commit. Public URL penales.juanikitro.com; DNS remains on Vercel. No persistent data or scheduled jobs detected. Rollback is redeploying the previous verified game artifact; keep Vercel until owner validation.
 
-Rollback before removing Vercel: restore the prior DNS record (initially this subdomain inherits the Vercel wildcard) or use the original vercel.app URL. The game stores no server-side data.
+Acceptance: 25 rules tests; all 21 public responses match recovered hashes; no browser errors; character and difficulty selection, match start, shot/keeper turns, powers, results/rematch, fullscreen and mobile landscape. Owner performs final gameplay validation. No fixed observation interval. Do not retire the origin before owner confirmation.
