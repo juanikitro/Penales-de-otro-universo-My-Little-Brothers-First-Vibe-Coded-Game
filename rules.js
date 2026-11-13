@@ -15,6 +15,15 @@
     medium: Object.freeze({ name: 'Medio', flight: 1.75, reaction: .32, accuracy: .31, keeperSpeed: 1.65, rivalMiss: .13 }),
     hard: Object.freeze({ name: 'Difícil', flight: 1.4, reaction: .18, accuracy: .14, keeperSpeed: 2.1, rivalMiss: .08 })
   });
+  const keeperPowers = Object.freeze({
+    goku: Object.freeze({ name: 'INSTINTO SUPERIOR', icon: '⚡', duration: .65 }),
+    naruto: Object.freeze({ name: 'CLON DE SOMBRA', icon: '👥', duration: .9 }),
+    subzero: Object.freeze({ name: 'CAMINO DE HIELO', icon: '❄', duration: .38 }),
+    peppa: Object.freeze({ name: 'BOLA DE LODO', icon: '●', duration: 1 }),
+    pikachu: Object.freeze({ name: 'IMÁN ELÉCTRICO', icon: 'ϟ', duration: .8 }),
+    ghost: Object.freeze({ name: 'SALTO FANTASMA', icon: '👻', duration: .4 }),
+    spiderman: Object.freeze({ name: 'RED SALVADORA', icon: '🕸', duration: .85 })
+  });
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
   function newMatch() { return { player: [], rival: [] }; }
   function record(match, side, goal) {
@@ -66,6 +75,22 @@
     const dx=(ball.x-center.x)/(keeper.aspect||1),dy=ball.y-center.y-keeperShape.offsetY;
     const p={x:(dx*Math.cos(angle)+dy*Math.sin(angle))/s,y:(-dx*Math.sin(angle)+dy*Math.cos(angle))/s};
     const r=ballRadius/s;
+    if(keeper.silhouette){
+      const {width,height,alpha,bounds}=keeper.silhouette;
+      const cellW=bounds.width/width,cellH=bounds.height/height;
+      if(p.x+r<bounds.x || p.x-r>bounds.x+bounds.width || p.y+r<bounds.y || p.y-r>bounds.y+bounds.height)return false;
+      const minX=clamp(Math.floor((p.x-r-bounds.x)/cellW),0,width-1);
+      const maxX=clamp(Math.floor((p.x+r-bounds.x)/cellW),0,width-1);
+      const minY=clamp(Math.floor((p.y-r-bounds.y)/cellH),0,height-1);
+      const maxY=clamp(Math.floor((p.y+r-bounds.y)/cellH),0,height-1);
+      for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
+        if(!alpha[y*width+x])continue;
+        const left=bounds.x+x*cellW,top=bounds.y+y*cellH;
+        const dx=p.x-clamp(p.x,left,left+cellW),dy=p.y-clamp(p.y,top,top+cellH);
+        if(dx*dx+dy*dy<=r*r)return true;
+      }
+      return false;
+    }
     const ellipses=[keeperHead(keeper.hero),...keeperShape.hands,keeperShape.torso];
     if(ellipses.some(e=>((p.x-e.x)/(e.rx+r))**2+((p.y-e.y)/(e.ry+r))**2<=1))return true;
     if(keeperShape.arms.some(arm=>segmentDistance(p,arm.a,arm.b)<=arm.radius+r))return true;
@@ -75,6 +100,45 @@
   function goalContact(progress,target,keeper) {
     // La proyección 2D se puede superponer antes; solo hay choque en el plano del arco.
     return progress>=1&&saved(target,keeper)?goalPoint(target):null;
+  }
+  function activateKeeperPower(hero,state,keeper,aim) {
+    if(state.used || !keeperPowers[hero])return state;
+    return {hero,used:true,remaining:keeperPowers[hero].duration,age:0,
+      origin:{x:keeper.x,y:keeper.y},
+      aim:{x:clamp(aim.x,-1.08,1.08),y:clamp(aim.y,-1.08,.95)},mudHit:false,pulled:0};
+  }
+  function advanceKeeperPower(state,delta) {
+    if(!state.used || state.remaining<=0)return state;
+    return {...state,remaining:Math.max(0,state.remaining-delta),age:state.age+delta};
+  }
+  function keeperPowerContact(progress,target,keeper,power) {
+    const contact=goalContact(progress,target,keeper);
+    if(contact || progress<1 || !inGoal(target) || !power.used || power.remaining<=0)return contact;
+    if(power.hero==='naruto')return goalContact(progress,target,{...keeper,...power.origin});
+    if(power.hero==='spiderman'){
+      const ball=goalPoint(target),net=goalPoint(power.aim);
+      // Red de radio 46, más el radio 10 de la pelota; coincide con el dibujo.
+      if(Math.hypot((ball.x-net.x)/(keeper.aspect||1),ball.y-net.y)<=56)return ball;
+    }
+    return null;
+  }
+  function mudContact(previous,next,ballBefore,ballAfter,aspect=1) {
+    // Barrido relativo: también detecta una pelota rápida que cruza el proyectil.
+    return segmentDistance({x:0,y:0},
+      {x:(previous.x-ballBefore.x)/aspect,y:previous.y-ballBefore.y},
+      {x:(next.x-ballAfter.x)/aspect,y:next.y-ballAfter.y})<=25;
+  }
+  function magnetPull(target,ball,keeper,delta,budget) {
+    if(!inGoal(target) || budget<=0)return {target,pulled:0};
+    const aspect=keeper.aspect||1;
+    const hands=keeperShape.hands.map(hand=>keeperPoint(keeper,hand));
+    const distance=hand=>Math.hypot((hand.x-ball.x)/aspect,hand.y-ball.y);
+    const hand=hands.sort((a,b)=>distance(a)-distance(b))[0];
+    if(distance(hand)>90)return {target,pulled:0};
+    const end=goalPoint(target),dx=(hand.x-end.x)/aspect,dy=hand.y-end.y,d=Math.hypot(dx,dy);
+    if(!d)return {target,pulled:0};
+    const step=Math.min(65*delta,budget,d);
+    return {target:{x:clamp(target.x+dx/d*step*aspect/300,-1,1),y:clamp(target.y+dy/d*step/110,-1,1)},pulled:step};
   }
   function flightPoint(progress,target,redirect=null,hero=null) {
     const end=goalPoint(target);
@@ -106,7 +170,8 @@
     if (ice.used || progress <= 0 || progress >= .94) return ice;
     return { used: true, frozen: true, remaining: 3 };
   }
-  const rules = Object.freeze({ heroes, levels, clamp, newMatch, record, score, winner, inGoal, saved, advanceIce, toggleIce,
+  const rules = Object.freeze({ heroes, levels, keeperPowers, activateKeeperPower, advanceKeeperPower, keeperPowerContact, mudContact, magnetPull,
+    clamp, newMatch, record, score, winner, inGoal, saved, advanceIce, toggleIce,
     keeperShape, keeperHead, goalPoint, keeperAngle, keeperPoint, touchesKeeper, goalContact, flightPoint, surpriseTarget, powerState });
   if (typeof module !== 'undefined' && module.exports) module.exports = rules;
   else root.PenaltyRules = rules;
